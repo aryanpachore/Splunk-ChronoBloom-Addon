@@ -1,0 +1,263 @@
+<dashboard version="1.1" theme="light">
+  <label>ChronoBloom Phenology Explorer</label>
+  <description>Real-time insights into environmental phenological events.</description>
+
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time_range" searchWhenChanged="true">
+      <label>Select Time Range:</label>
+      <default>
+        <earliest>-7d@d</earliest>
+        <latest>now</latest>
+      </default>
+      <change>
+        <eval token="earliest_time_token">if(isnull($time_range.earliest$), "-7d@d", $time_range.earliest$)</eval>
+        <eval token="latest_time_token">if(isnull($time_range.latest$), "now", $time_range.latest$)</eval>
+      </change>
+    </input>
+
+    <input type="dropdown" token="selected_species" multiValue="true" searchWhenChanged="true">
+      <label>Filter by Species:</label>
+      <choice value="*">All Species</choice>
+      <populatingSavedSearch fieldForLabel="species_name" fieldForValue="species_name">
+        <query>index=main sourcetype=chronobloom | stats count by species_name | sort species_name</query>
+        <earliest>2025-06-01</earliest>
+        <latest>2025-08-31</latest>
+      </populatingSavedSearch>
+      <default>*</default>
+    </input>
+
+    <input type="dropdown" token="selected_state" multiValue="true" searchWhenChanged="true">
+      <label>Filter by State:</label>
+      <choice value="*">All States</choice>
+      <populatingSavedSearch fieldForLabel="state" fieldForValue="state">
+        <query>index=main sourcetype=chronobloom | stats count by state | sort state</query>
+        <earliest>2025-06-01</earliest>
+        <latest>2025-08-31</latest>
+      </populatingSavedSearch>
+      <default>*</default>
+    </input>
+  </fieldset>
+
+  <row>
+    <panel>
+      <title>Welcome to ChronoBloom Insights</title>
+      <html>
+        <div style="padding: 15px; background-color: #e6f3f8; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <h2 style="color: #333; margin-top: 0;">Monitoring Earth's Rhythms with Splunk</h2>
+          <p style="color: #555; line-height: 1.6;">
+            This dashboard provides a real-time view of phenological observations. Track seasonal changes,
+            monitor species activity, and gain actionable insights into environmental shifts directly within Splunk.
+          </p>
+          <ul style="list-style-type: disc; margin-left: 20px; color: #666;">
+            <li>'Latest Events' shows the most recent observations.</li>
+            <li>'Observations Trend' visualizes activity over time.</li>
+            <li>'Breakdown' panels help identify key species and regions.</li>
+            <li>'Phenophase Occurrences by Day of Year' highlights seasonal timing shifts.</li>
+            <li>'Potential Phenological Not-Observed Anomalies' helps spot unusual 'Not Observed' events.</li>
+          </ul>
+        </div>
+      </html>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Latest Phenological Events</title>
+      <table>
+        <search>
+          <query>index=main sourcetype=chronobloom species_name=$selected_species$ state=$selected_state$ | sort -_time | head 25 | table _time, species_name, phenophase_name, phenophase_status, site_name, state, observation_date, latitude, longitude</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">true</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">row</option>
+        <option name="count">10</option>
+        <drilldown>
+          <link target="_blank">
+            <![CDATA[/app/search/search?q=index%3Dmain%20_raw%3D"$row._raw$"&earliest=$time_range.earliest$&latest=$time_range.latest$]]>
+          </link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Geospatial Distribution of Observations (Heatmap by Species)</title>
+      <map>
+        <search>
+          <query>index=main sourcetype=chronobloom species_name=$selected_species$ state=$selected_state$ | geostats latfield=latitude longfield=longitude count by species_name</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="mapping.map.mapMarker">heatmap</option>
+        <option name="mapping.data.heatmap.colorBuckets">5</option>
+        <option name="mapping.data.heatmap.maxColor">#CC0000</option>
+        <option name="mapping.data.heatmap.minColor">#FFFF00</option>
+        <option name="mapping.data.heatmap.radius">25</option>
+        <option name="mapping.data.heatmap.blur">15</option>
+        <option name="mapping.map.centerLat">39.8283</option>
+        <option name="mapping.map.centerLon">-98.5795</option>
+        <option name="mapping.map.zoom">4</option>
+        <option name="mapping.drilldown">full</option>
+      </map>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Potential Phenological Not-Observed Anomalies</title>
+      <table id="not_observed_anomalies_table">
+        <search>
+          <query>index=main sourcetype=chronobloom phenophase_status="0" species_name=$selected_species$ state=$selected_state$ | sort -_time | dedup species_name, phenophase_name, site_name | table _time, species_name, phenophase_name, phenophase_status, site_name, state, observation_date</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">true</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">row</option>
+        <option name="count">10</option>
+        <drilldown>
+          <link target="_blank">
+            <![CDATA[/app/search/search?q=index%3Dmain%20sourcetype%3Dchronobloom%20species_name%3D"$row.species_name$"%20phenophase_name%3D"$row.phenophase_name$"%20site_name%3D"$row.site_name$"%20observation_date%3D"$row.observation_date$"&earliest=$time_range.earliest$&latest=$time_range.latest$]]>
+          </link>
+        </drilldown>
+        <format type="color" field="phenophase_status">
+          <color value="#D62728" type="exact" string="0"></color>
+        </format>
+      </table>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Phenophase Occurrences by Day of Year</title>
+      <chart>
+        <search>
+          <query>
+            index=main sourcetype=chronobloom phenophase_status=1 species_name=$selected_species$ state=$selected_state$
+            | eval observation_datetime = strptime(observation_date, "%Y-%m-%d")
+            | eval day_of_year = strftime(observation_datetime, "%j")
+            | eval event_time = strftime(_time, "%Y-%m-%d")
+            | table event_time, species_name, phenophase_name, day_of_year
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">scatter</option>
+        <option name="charting.axisTitleX.text">Observation Date</option>
+        <option name="charting.axisTitleY.text">Day of Year (DOY)</option>
+        <option name="charting.fieldColors">
+          {"Red maple":"#A0522D", "American robin":"#87CEEB", "Lilac":"#DA70D6"}
+        </option>
+        <option name="charting.scatter.clusterMode">none</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.fieldReference.primaryXAxis.field">event_time</option>
+        <option name="charting.fieldReference.primaryYAxis.field">day_of_year</option>
+        <option name="charting.series.colorByField">species_name</option>
+        <option name="charting.tooltip.enabled">true</option>
+        <drilldown>
+          <link target="_blank">
+            <![CDATA[/app/search/search?q=index%3Dmain%20sourcetype%3Dchronobloom%20observation_date%3D"$click.name$"%20species_name%3D"$click.name2$"&earliest=$time_range.earliest$&latest=$time_range.latest$]]>
+          </link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Observations Trend Over Time</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype=chronobloom species_name=$selected_species$ state=$selected_state$ | timechart span=1d count</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.axisY.minimumNumber">0</option>
+        <option name="charting.axisTitleX.text">Observation Date</option>
+        <option name="charting.axisTitleY.text">Number of Events</option>
+        <option name="charting.fieldColors">{"count":"#0072B2"}</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.tooltip.enabled">true</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Phenophase Status Breakdown</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype=chronobloom species_name=$selected_species$ state=$selected_state$ | stats count by phenophase_status | eval phenophase_status=case(phenophase_status="1","Observed",phenophase_status="0","Not Observed",true(),"Unknown")</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"Observed":"#2CA02C","Not Observed":"#D62728","Unknown":"#FF7F0E"}</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.sliceCollapsingThreshold">0.01</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Top Species by Observations</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype=chronobloom species_name=$selected_species$ state=$selected_state$ | stats count by species_name | sort -count | head 10</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.axisY.minimumNumber">0</option>
+        <option name="charting.axisTitleX.text">Species Name</option>
+        <option name="charting.axisTitleY.text">Number of Observations</option>
+        <option name="charting.fieldColors">{"count":"#A6CEE3"}</option>
+        <option name="charting.legend.placement">none</option>
+        <drilldown>
+          <link target="_blank">
+            <![CDATA[/app/search/search?q=index%3Dmain%20sourcetype%3Dchronobloom%20species_name%3D"$click.value$"&earliest=$time_range.earliest$&latest=$time_range.latest$]]>
+          </link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Observations by State</title>
+      <table>
+        <search>
+          <query>index=main sourcetype=chronobloom species_name=$selected_species$ state=$selected_state$ | stats count by state | sort -count | head 10</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">true</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="count">5</option>
+      </table>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Recent ChronoBloom Alert Triggers</title>
+      <table>
+        <search>
+          <query>index=_audit action=alert_triggered alert_name="Red Maple First Flower Not Observed Alert" | table _time, user, alert_name, search_name, info</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">true</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+
+</dashboard>

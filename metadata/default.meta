@@ -1,0 +1,18 @@
+[views]
+access = read : [ * ], write : [ admin ]
+export = system
+[savedsearches]
+access = read : [ * ], write : [ admin ]
+export = system
+[macros]
+access = read : [ * ], write : [ admin ]
+export = system
+[inputs]
+access = read : [ * ], write : [ admin ]
+export = system
+[props]
+access = read : [ * ], write : [ admin ]
+export = system
+[transforms]
+access = read : [ * ], write : [ admin ]
+export = system
