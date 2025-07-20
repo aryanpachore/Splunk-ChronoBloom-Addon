@@ -107,3 +107,74 @@ Open your Git-enabled terminal or command prompt and clone this project reposito
 ```bash
 git clone git@github.com:aryanpachore/Splunk-ChronoBloom-Addon.git
 cd Splunk-ChronoBloom-Addon
+
+3. Deploy the Splunk Add-on
+Copy the contents of your cloned repository into the Splunk apps directory.
+
+Navigate to Splunk Apps Directory:
+
+Windows: C:\Program Files\Splunk\etc\apps\
+
+Linux/macOS: /opt/splunk/etc/apps/
+
+Copy the Add-on: Copy the entire Splunk-ChronoBloom-Addon folder (the one you cloned from GitHub, containing default/, bin/, README.md, etc.) into the Splunk apps directory.
+
+4. Configure Gemini API Key and Splunk Credentials
+Your prediction script needs access to your Gemini API key and Splunk credentials.
+
+Create .env file: In the root directory of your Splunk-ChronoBloom-Addon folder (the one you cloned from GitHub), create a new file named .env.
+
+Add Credentials: Paste the following into the .env file, replacing the placeholder values with your actual credentials:
+
+GEMINI_API_KEY="YOUR_GEMINI_API_KEY_HERE"
+SPLUNK_HOST="localhost"
+SPLUNK_PORT=8089
+SPLUNK_USERNAME="admin"
+SPLUNK_PASSWORD="YOUR_SPLUNK_PASSWORD_HERE"
+Important: Add /.env to your .gitignore file to prevent accidentally pushing your API key and password to GitHub.
+
+5. Install Python Dependencies
+Navigate to the root directory of your Splunk-ChronoBloom-Addon project in your terminal/command prompt and install the necessary Python libraries:
+
+Bash
+
+pip install splunk-sdk google-generativeai python-dotenv
+6. Create the 'predictions' Index in Splunk
+Your prediction script will ingest data into a dedicated Splunk index.
+
+Log in to Splunk Web: (usually http://localhost:8000).
+
+Navigate: Go to Settings > Indexes.
+
+Create New Index: Click New Index.
+
+Index Name: Enter predictions (all lowercase).
+
+Save: Click Save.
+
+7. Restart Splunk
+After placing the app files, configuring inputs.conf, and setting up the prediction index, you need to restart Splunk for all changes to take effect and for the data input scripts to begin running.
+
+From Splunk Web: Go to Settings > Server controls and click Restart Splunk.
+
+From Terminal/Command Prompt (as Administrator):
+
+Windows: Navigate to C:\Program Files\Splunk\bin\ and run splunk restart.
+
+Linux/macOS: Run sudo /opt/splunk/bin/splunk restart.
+
+8. Verify Data Ingestion (ChronoBloom & Predictions)
+Log in to Splunk Web: (usually http://localhost:8000).
+
+Go to Search & Reporting:
+
+ChronoBloom Data: Run index=main sourcetype=chronobloom (set time range to "All time"). You should see events from your chronobloom_input.py script.
+
+AI Predictions: Run index=predictions sourcetype=chrono_predictions (set time range to "All time"). You should start seeing events from your gemini_prediction_script.py after its first run (check inputs.conf for its interval, typically 1 hour or 24 hours).
+
+9. Access the Dashboard
+Once data is flowing, navigate to the "Apps" menu in Splunk Web.
+
+Click on your Splunk-ChronoBloom-Addon.
+
+You should be directed to the "ChronoBloom Phenology Explorer" dashboard, which will now populate with your data and predictions!
