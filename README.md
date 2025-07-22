@@ -1,4 +1,4 @@
-# Splunk-ChronoBloom-Addon
+#<img width="1024" height="1024" alt="Adobe Express - file" src="https://github.com/user-attachments/assets/68f57eaf-6ecf-4215-bc74-f4299223bc32" /> Splunk-ChronoBloom-Addon
 
 **Real-time insights into environmental phenological events using Splunk Enterprise.**
 
