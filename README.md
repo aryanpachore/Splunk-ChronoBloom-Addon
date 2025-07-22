@@ -180,8 +180,10 @@ ChronoBloom Data: Run index=main sourcetype=chronobloom (set time range to "All 
 AI Predictions: Run index=predictions sourcetype=chrono_predictions (set time range to "All time"). You should start seeing events from your gemini_prediction_script.py after its first run (check inputs.conf for its interval, typically 1 hour or 24 hours).
 
 9. Access the Dashboard
-Once data is flowing, navigate to the "Apps" menu in Splunk Web.
+Once data is flowing, navigate to the "Search & Reporting" menu in Splunk Web.
 
-Click on your Splunk-ChronoBloom-Addon.
+Click on Dashboards.
+
+Select ChronoBloom Phenology Explorer from the list.
 
 You should be directed to the "ChronoBloom Phenology Explorer" dashboard, which will now populate with your data and predictions!
