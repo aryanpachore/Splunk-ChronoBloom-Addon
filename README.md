@@ -90,7 +90,12 @@ _An overall view of the ChronoBloom Phenology Explorer dashboard._
 [Watch the ChronoBloom Splunk Addon Prototype Demonstration Here!](https://tinyurl.com/Demonstrationlink)
 
 ---
+## Architecture
+<img width="2197" height="3844" alt="Untitled diagram _ Mermaid Chart-2025-07-22-122638" src="https://github.com/user-attachments/assets/62b55fda-0a30-4512-b698-f803404a6a1d" />
 
+
+
+---
 ## Installation Guide (Running Project Locally)
 
 To set up and run the Splunk-ChronoBloom-Addon locally, follow these steps:
