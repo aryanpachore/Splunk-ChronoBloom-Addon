@@ -1,7 +1,6 @@
-<div style="text-align: center;">
-  <img width="512" height="478" alt="App Icon" src="https://github.com/user-attachments/assets/5c73192e-ee2e-474e-ab97-9747b6d07510" />
-</div>
-#Splunk-ChronoBloom-Addon
+<img width="100" alt="App Icon" src="https://github.com/user-attachments/assets/5c73192e-ee2e-474e-ab97-9747b6d07510" />   
+
+## Splunk-ChronoBloom-Addon
 
 **Real-time insights into environmental phenological events using Splunk Enterprise.**
 
